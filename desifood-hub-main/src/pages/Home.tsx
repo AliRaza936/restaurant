@@ -28,7 +28,7 @@ const Home = () => {
 
   const dispatch = useDispatch();
 
-  let { products,loading} = useSelector((state: any) => state.products);
+  let { products,loading,error} = useSelector((state: any) => state.products);
   let categories = useSelector((state: any) => state.categories?.categories);
  // Filter products
   const filteredProducts = products.filter((product: any) => {
@@ -68,7 +68,9 @@ const Home = () => {
     dispatch(getAllProducts());
     dispatch(getCat());
   }, [dispatch]);
-
+if(error){
+  toast.error(error)
+}
   return (
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
@@ -166,7 +168,7 @@ const Home = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredNonFeatured?.map((product: any) => (
+                  {filteredNonFeatured?.slice(0)?.reverse().map((product: any) => (
                     <ProductCard
                       key={product.id}
                       product={product}
