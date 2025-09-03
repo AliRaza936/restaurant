@@ -8,7 +8,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
+<<<<<<< HEAD
             <h3 className="text-2xl font-bold text-orange-500">Spice Palace Hub</h3>
+=======
+            <h3 className="text-2xl font-bold text-orange-500">Spice Palace</h3>
+>>>>>>> 958f01cc00a47b67ee9e1c8391ec5d4b725f217a
             <p className="text-gray-300 text-sm leading-relaxed">
               Bringing authentic Pakistani cuisine to your doorstep. Experience the rich flavors 
               and traditional recipes that make our food special.
@@ -38,7 +42,11 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+<<<<<<< HEAD
           © 2025 Spice Palace Hub. Made with <Heart className="h-4 w-4 text-red-500 inline mx-1" /> in Pakistan
+=======
+          © 2025 Spice palace Hub. Made with <Heart className="h-4 w-4 text-red-500 inline mx-1" /> in Pakistan
+>>>>>>> 958f01cc00a47b67ee9e1c8391ec5d4b725f217a
         </div>
       </div>
     </footer>
