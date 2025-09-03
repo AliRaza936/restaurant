@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-orange-500">DesiFood Hub</h3>
+            <h3 className="text-2xl font-bold text-orange-500">Spice Palace</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
               Bringing authentic Pakistani cuisine to your doorstep. Experience the rich flavors 
               and traditional recipes that make our food special.
@@ -38,7 +38,7 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-          © 2025 DesiFood Hub. Made with <Heart className="h-4 w-4 text-red-500 inline mx-1" /> in Pakistan
+          © 2025 Spice palace Hub. Made with <Heart className="h-4 w-4 text-red-500 inline mx-1" /> in Pakistan
         </div>
       </div>
     </footer>
