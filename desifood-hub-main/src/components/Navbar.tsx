@@ -213,7 +213,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
                   <Link to="/admin/dashboard" className="block">
                     <Button variant="outline" className="w-full text-white justify-start">
                       <Shield className="h-5 w-5 mr-2 text-white" />
-                      Admin Panel
+                      <span>{user.role === 'user' ? 'Admin panel (Testing)' : 'Admin Panel'}</span>
                     </Button>
                   </Link>
                 )}
