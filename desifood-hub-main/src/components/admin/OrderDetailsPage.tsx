@@ -21,6 +21,7 @@ import { Order, orderStatuses } from '@/data/admin';
 import { useDispatch } from 'react-redux';
 import { getOrderById, updateOrderStatus } from '@/store/order/orderSlice';
 import { AppDispatch } from '@/store/store';
+import { toast } from 'sonner';
 
 interface OrderDetailsPageProps {
   orderId: string;
@@ -133,6 +134,20 @@ const OrderDetailsPage = ({ orderId, onBack, onStatusUpdate }: OrderDetailsPageP
     }).format(date);
   };
 
+
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+  dispatch(updateOrderStatus({ id: orderId, status: newStatus }) as any)
+    .unwrap()
+    .then(() => {
+      toast.success(`Order #${orderId} status updated to ${newStatus}`);
+      setOrder((prev) =>
+        prev ? { ...prev, status: newStatus as Order['status'] } : null
+      );
+    })
+    .catch((err) => {
+      toast.error(`Failed to update order #${orderId}: ${err}`);
+    });
+};
   if (loading) {
     return (
       <div className="space-y-6">
@@ -191,163 +206,168 @@ const OrderDetailsPage = ({ orderId, onBack, onStatusUpdate }: OrderDetailsPageP
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 text-white" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Order #{order.id}</h1>
-          <p className="text-muted-foreground">
-            Detailed view of customer order and delivery information.
-          </p>
-        </div>
+ return (
+  <div className="space-y-6">
+    {/* Back Button & Heading */}
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      <Button variant="outline" size="icon" onClick={onBack} className="self-start">
+        <ArrowLeft className="h-4 w-4 text-white" />
+      </Button>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          Order #{order.id}
+        </h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Detailed view of customer order and delivery information.
+        </p>
       </div>
+    </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Order Summary */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Order Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Order Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className={getStatusColor(order.status)}>
-                    {getStatusIcon(order.status)}
-                    <span className="ml-1">{order.status}</span>
-                  </Badge>
-                  <Badge className={getPaymentStatusColor(order.paymentStatus)}>
-                    {order.paymentStatus}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Update Status:</span>
-                  <Select
-                    value={order.status}
-                    onValueChange={(value) => {
-                      dispatch(updateOrderStatus({ id: order.id, status: value }) as any);
-                      // Also update local state for immediate feedback
-                      setOrder(prev => prev ? { ...prev, status: value as Order['status'] } : null);
-                    }}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orderStatuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Order placed on {formatDate(order.orderDate)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Order Items */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Items</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{item.productName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity} × {formatCurrency(item.price)}
-                      </p>
-                    </div>
-                    <span className="font-medium">{formatCurrency(item.total)}</span>
-                  </div>
-                ))}
-                <div className="border-t pt-3">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span>{formatCurrency(order.total)}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Customer & Payment Info */}
-        <div className="space-y-6">
-          {/* Customer Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Customer Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{order.customerName}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{order.customerPhone}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Delivery Address */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Delivery Address
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{order.deliveryAddress}</p>
-            </CardContent>
-          </Card>
-
-          {/* Payment Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Payment Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Method:</span>
-                <span className="text-sm capitalize">{order.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Status:</span>
+    {/* Main Layout */}
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {/* Order Summary (take 2 cols on lg) */}
+      <div className="md:col-span-2 space-y-6">
+        {/* Order Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Order Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Responsive row */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className={getStatusColor(order.status)}>
+                  {getStatusIcon(order.status)}
+                  <span className="ml-1">{order.status}</span>
+                </Badge>
                 <Badge className={getPaymentStatusColor(order.paymentStatus)}>
                   {order.paymentStatus}
                 </Badge>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <span className="text-sm font-medium">Update Status:</span>
+           <Select
+  value={order.status}
+  onValueChange={(value) => handleStatusChange(order.id, value)}
+>
+  <SelectTrigger className="w-48">
+    <SelectValue />
+  </SelectTrigger>
+  <SelectContent>
+    {orderStatuses.map((status) => (
+      <SelectItem key={status} value={status}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>Order placed on {formatDate(order.orderDate)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Order Items */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Order Items</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {order.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 border rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{item.productName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Quantity: {item.quantity} × {formatCurrency(item.price)}
+                    </p>
+                  </div>
+                  <span className="font-medium">{formatCurrency(item.total)}</span>
+                </div>
+              ))}
+              <div className="border-t pt-3">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span>{formatCurrency(order.total)}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Customer & Payment Info */}
+      <div className="space-y-6">
+        {/* Customer */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Customer Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{order.customerName}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{order.customerPhone}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Delivery */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Delivery Address
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">{order.deliveryAddress}</p>
+          </CardContent>
+        </Card>
+
+        {/* Payment */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Payment Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Method:</span>
+              <span className="text-sm capitalize">{order.paymentMethod}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Status:</span>
+              <Badge className={getPaymentStatusColor(order.paymentStatus)}>
+                {order.paymentStatus}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export { OrderDetailsPage }; 

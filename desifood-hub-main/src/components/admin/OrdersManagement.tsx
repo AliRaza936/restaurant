@@ -246,74 +246,74 @@ const handleStatusChange = (orderId: string, newStatus: string) => {
         </p>
       </div>
 
-      {/* Time Filter Tabs */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Time Filter
-          </CardTitle>
-          <CardDescription>
-            Filter orders by time period to focus on specific timeframes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {(['1hour', '1week', '1month', '6months', '1year', 'all'] as TimeFilter[]).map((filter) => (
-              <Button
-                key={filter}
-                variant={timeFilter === filter ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setTimeFilter(filter)}
-                className="flex items-center gap-2"
-              >
-                <Calendar className="h-4 w-4" />
-                {getTimeFilterLabel(filter)}
-                <Badge variant="secondary" className="ml-1">
-                  {getTimeFilterCount(filter)}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+<Card>
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <Filter className="h-5 w-5" />
+      Time Filter
+    </CardTitle>
+    <CardDescription>
+      Filter orders by time period to focus on specific timeframes
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    {/* Horizontal scroll on mobile */}
+    <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 sm:flex-wrap">
+      {(['1hour', '1week', '1month', '6months', '1year', 'all'] as TimeFilter[]).map((filter) => (
+        <Button
+          key={filter}
+          variant={timeFilter === filter ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setTimeFilter(filter)}
+          className="flex items-center  gap-2 whitespace-nowrap min-w-[120px]" 
+        >
+          <Calendar className="h-4 w-4" />
+          {getTimeFilterLabel(filter)}
+          <Badge variant="secondary" className="ml-1">
+            {getTimeFilterCount(filter)}
+          </Badge>
+        </Button>
+      ))}
+    </div>
+  </CardContent>
+</Card>
 
-      {/* Search and Status Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search orders by customer name, email, or order ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Statuses</SelectItem>
-                {orderStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+{/* Search and Status Filters */}
+<Card>
+  <CardContent className="pt-6">
+    <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search orders by customer name, email, or order ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-full sm:w-48">
+          <SelectValue placeholder="All Statuses" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="All">All Statuses</SelectItem>
+          {orderStatuses.map((status) => (
+            <SelectItem key={status} value={status}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  </CardContent>
+</Card>
 
       {/* Orders Summary */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{filteredOrders.length}</div>
               <div className="text-sm text-muted-foreground">Total Orders</div>
@@ -352,27 +352,27 @@ const handleStatusChange = (orderId: string, newStatus: string) => {
       <div className="space-y-4">
         {filteredOrders.map((order) => (
           <Card key={order.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">Order #{order.id}</CardTitle>
-                  <CardDescription>
-                    Placed on {formatDate(order.orderDate)}
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Badge className={getStatusColor(order.status)}>
-                    {getStatusIcon(order.status)}
-                    <span className="ml-1">{order.status}</span>
-                  </Badge>
-                  <Badge className={getPaymentStatusColor(order.paymentStatus)}>
-                    {order.paymentStatus}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
+           <CardHeader>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
+          <div>
+            <CardTitle className="text-lg">Order #{order.id}</CardTitle>
+            <CardDescription>
+              Placed on {formatDate(order.orderDate)}
+            </CardDescription>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Badge className={getStatusColor(order.status)}>
+              {getStatusIcon(order.status)}
+              <span className="ml-1">{order.status}</span>
+            </Badge>
+            <Badge className={getPaymentStatusColor(order.paymentStatus)}>
+              {order.paymentStatus}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
+               <div className="grid gap-4 md:grid-cols-2">
                 {/* Customer Info */}
                 <div className="space-y-3">
                   <div>
@@ -415,34 +415,34 @@ const handleStatusChange = (orderId: string, newStatus: string) => {
 
               {/* Status Update */}
               <div className="border-t pt-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">Update Status:</span>
-                
-                  <Select
-                    value={order.status}
-                    onValueChange={(value) => handleStatusChange(order.id, value)}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orderStatuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleViewOrder(order.id)}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Details
-                  </Button>
-                </div>
-              </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <span className="text-sm font-medium">Update Status:</span>
+            <Select
+              value={order.status}
+              onValueChange={(value) => handleStatusChange(order.id, value)}
+            >
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {orderStatuses.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleViewOrder(order.id)}
+              className="w-full sm:w-auto"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Details
+            </Button>
+          </div>
+        </div>
             </CardContent>
           </Card>
         ))}
