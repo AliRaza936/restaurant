@@ -16,7 +16,7 @@ dotenv.config()
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:8080", // frontend URL
+  origin: "https://spice-palace.vercel.app", // frontend URL
   credentials: true // allow cookies/auth headers
 }));
 // ensure uploads dir exists for multer temp storage
