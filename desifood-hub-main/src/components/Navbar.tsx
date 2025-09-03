@@ -23,7 +23,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
-  const { itemCount } = useAppSelector(state => state.cart);
+   const { items } = useAppSelector(state => state.cart);
   const { count: favoritesCount } = useAppSelector(state => state.favorites);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -150,9 +150,9 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
             <Link to="/cart">
               <Button variant="outline" size="icon" className="relative border-border hover:border-primary">
                 <ShoppingCart className="h-5 w-5 text-white" />
-                {itemCount > 0 && (
+                {items?.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {itemCount}
+                    {items?.length}
                   </span>
                 )}
               </Button>
@@ -238,7 +238,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
             <Link to="/cart" className="block">
               <Button variant="outline" className="w-full justify-start text-white">
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                Cart ({itemCount})
+                Cart ({items?.length})
               </Button>
             </Link>
           </div>
