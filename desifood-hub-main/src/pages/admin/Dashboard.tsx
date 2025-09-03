@@ -95,120 +95,132 @@ const getStatusColor = (status: string) => {
   };
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to your restaurant management dashboard. Here's an overview of your business.
-          </p>
-        </div>
+     <div className="space-y-6">
+  <div>
+    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+      Dashboard
+    </h1>
+    <p className="text-muted-foreground text-sm sm:text-base">
+      Welcome to your restaurant management dashboard. Here's an overview of your business.
+    </p>
+  </div>
 
-        {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-               
-              </CardContent>
-            </Card>
-            
-          ))}
-           <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-      <Package className="h-4 w-4 text-purple-600" />
+  {/* Stats Grid */}
+  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    {stats.map((stat) => (
+      <Card key={stat.title} className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+          <stat.icon className={`h-4 w-4 ${stat.color}`} />
+        </CardHeader>
+        <CardContent>
+          <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+        </CardContent>
+      </Card>
+    ))}
+
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+        <Package className="h-4 w-4 text-purple-600" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-xl sm:text-2xl font-bold">{productStats.totalProducts}</div>
+        <p className="text-xs text-muted-foreground">
+          Featured: {productStats.totalFeatured} • Variants: {productStats.totalVariants}
+        </p>
+      </CardContent>
+    </Card>
+  </div>
+
+  {/* Recent Orders */}
+  <Card>
+    <CardHeader>
+      <CardTitle>Recent Orders</CardTitle>
+      <CardDescription>Latest customer orders and their status</CardDescription>
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{productStats.totalProducts}</div>
-      <p className="text-xs text-muted-foreground">
-        Featured: {productStats.totalFeatured} • Variants: {productStats.totalVariants}
-      </p>
+      <div className="space-y-4">
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border rounded-lg"
+          >
+            {/* Left: Order Info */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium text-sm sm:text-base">{order.id}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{order.name}</p>
+              </div>
+            </div>
+
+            {/* Middle: Amount & Date */}
+            <div className="text-left sm:text-right flex-1">
+              <p className="font-medium text-sm sm:text-base">
+                {order.items.length} items • {formatCurrency(Number(order.total_amount))}
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+              </p>
+            </div>
+
+            {/* Status Badge */}
+            <div className="sm:ml-4">
+              <span
+                className={`${getStatusColor(order.status)} rounded-lg px-2 py-1 text-xs sm:text-sm`}
+              >
+                {order.status}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </CardContent>
   </Card>
-        </div>
-        
 
-        {/* Recent Orders */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-            <CardDescription>Latest customer orders and their status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <ShoppingCart className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{order.id}</p>
-                      <p className="text-sm text-muted-foreground">{order.name}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium"> {order.items.length} items • {formatCurrency(Number(order.total_amount))}</p>
-                   <p className="text-sm text-muted-foreground">
-  {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
-</p>
+  {/* Quick Actions */}
+  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <Link to={'/admin/products'}>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Package className="h-5 w-5" />
+            Add New Product
+          </CardTitle>
+          <CardDescription>Create a new menu item</CardDescription>
+        </CardHeader>
+      </Card>
+    </Link>
 
-                  </div>
-                  <div className="ml-4">
-                    <span  className={`${getStatusColor(order.status)} rounded-lg px-2 pb-1`}>
-                      {order.status }
-                         </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+    <Link to={'/admin/orders'}>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <ShoppingCart className="h-5 w-5" />
+            View Orders
+          </CardTitle>
+          <CardDescription>Check order status</CardDescription>
+        </CardHeader>
+      </Card>
+    </Link>
 
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link to={'/admin/products'}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Add New Product
-              </CardTitle>
-              <CardDescription>Create a new menu item</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-          
-          <Link to={'/admin/orders'}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                View Orders
-              </CardTitle>
-              <CardDescription>Check order status</CardDescription>
-            </CardHeader>
-          </Card>
-          </Link>
-          
-        <Link to={'/admin/analytics'}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                View Analytics
-              </CardTitle>
-              <CardDescription>Business insights</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-        </div>
-      </div>
+    <Link to={'/admin/analytics'}>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <BarChart3 className="h-5 w-5" />
+            View Analytics
+          </CardTitle>
+          <CardDescription>Business insights</CardDescription>
+        </CardHeader>
+      </Card>
+    </Link>
+  </div>
+</div>
+
     </AdminLayout>
   );
 };
