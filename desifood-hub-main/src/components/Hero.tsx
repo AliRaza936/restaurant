@@ -20,7 +20,7 @@ export const Hero = () => {
           </span>
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-0 max-w-2xl mx-auto leading-relaxed">
-         Freshly cooked fast food, made with love and served with speed.
+         Freshly cooked fast food,made with love and served with speed.
         </p>
       </div>
     </section>
