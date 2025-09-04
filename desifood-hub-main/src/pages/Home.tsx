@@ -248,30 +248,24 @@ const Home = () => {
                 </div>
               ) : (
                 <motion.div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  initial="hidden"
-                  animate="show"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.15 },
-                    },
-                  }}
-                >
-                  {filteredNonFeatured?.slice(0)?.reverse().map((product: any) => (
-                    <motion.div
-                      key={product.id}
-                      variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0 } }}
-                    >
-                      <ProductCard
-                        product={product}
-                        categories={categories}
-                        onClick={handleProductClick}
-                      />
-                    </motion.div>
-                  ))}
-                </motion.div>
+  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+>
+  {filteredNonFeatured?.slice(0)?.reverse().map((product: any) => (
+    <motion.div
+      key={product.id}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      viewport={{ once: false, amount: 0.2 }} // 👈 will trigger when scrolled into view
+    >
+      <ProductCard
+        product={product}
+        categories={categories}
+        onClick={handleProductClick}
+      />
+    </motion.div>
+  ))}
+</motion.div>
               )}
             </motion.section>
           </>
