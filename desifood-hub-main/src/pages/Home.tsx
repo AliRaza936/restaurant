@@ -8,6 +8,9 @@ import Footer from '@/components/Footer';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from '@/store/product/productSlice';
 import { getCat } from '@/store/category/categorySlice';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';   
+import Loader from '@/components/Loader';
 
 const SkeletonCard = () => (
   <div className="animate-pulse rounded-2xl shadow-md bg-muted p-4 space-y-4">
@@ -28,9 +31,9 @@ const Home = () => {
 
   const dispatch = useDispatch();
 
-  let { products,loading,error} = useSelector((state: any) => state.products);
+  let { products, loading, error } = useSelector((state: any) => state.products);
   let categories = useSelector((state: any) => state.categories?.categories);
- // Filter products
+
   const filteredProducts = products.filter((product: any) => {
     const matchesCategory =
       selectedCategory.value === 'All' || product.categoryId === selectedCategory.value;
@@ -68,19 +71,50 @@ const Home = () => {
     dispatch(getAllProducts());
     dispatch(getCat());
   }, [dispatch]);
-if(error){
-  toast.error(error)
-}
+
+  if (error) {
+    toast.error(error);
+  }
+  const [showEntryLoader, setShowEntryLoader] = useState(true);
+
+  useEffect(() => {
+    // random delay between 2000–3000ms
+    const delay = Math.floor(Math.random() * 1000) + 2000;
+
+    const timer = setTimeout(() => {
+      setShowEntryLoader(false);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showEntryLoader) {
+    return <Loader />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
 
-      {!searchQuery && <Hero />}
+      {/* Hero with fade-in */}
+      {!searchQuery && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 2, ease: 'easeOut' }}
+        >
+          <Hero />
+        </motion.div>
+      )}
 
       <main className="container mx-auto px-4 py-8">
         {/* Search Results */}
         {searchQuery ? (
-          <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-foreground">
                 Search results for "{searchQuery}"
@@ -103,22 +137,43 @@ if(error){
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.15 },
+                  },
+                }}
+              >
                 {filteredProducts.map((product: any) => (
-                  <ProductCard
+                  <motion.div
                     key={product.id}
-                    product={product}
-                    categories={categories}
-                    onClick={handleProductClick}
-                  />
+                    variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0 } }}
+                  >
+                    <ProductCard
+                      product={product}
+                      categories={categories}
+                      onClick={handleProductClick}
+                    />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
-          </>
+          </motion.div>
         ) : (
           <>
             {/* Featured Products */}
-            <section className="mb-12">
+            <motion.section
+              className="mb-12"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
               <h2 className="text-3xl font-bold text-foreground mb-6 text-center">
                 Featured Dishes
               </h2>
@@ -129,21 +184,41 @@ if(error){
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <motion.div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  initial="hidden"
+                  animate="show"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.2 },
+                    },
+                  }}
+                >
                   {featuredProducts.map((product: any) => (
-                    <ProductCard
+                    <motion.div
                       key={product.id}
-                      product={product}
-                      categories={categories}
-                      onClick={handleProductClick}
-                    />
+                      variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0 } }}
+                    >
+                      <ProductCard
+                        product={product}
+                        categories={categories}
+                        onClick={handleProductClick}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
-            </section>
+            </motion.section>
 
             {/* Non-Featured Products */}
-            <section>
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
               <h2 className="text-3xl font-bold text-foreground mb-6 text-center">
                 All Products
               </h2>
@@ -167,18 +242,33 @@ if(error){
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <motion.div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  initial="hidden"
+                  animate="show"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.15 },
+                    },
+                  }}
+                >
                   {filteredNonFeatured?.slice(0)?.reverse().map((product: any) => (
-                    <ProductCard
+                    <motion.div
                       key={product.id}
-                      product={product}
-                      categories={categories}
-                      onClick={handleProductClick}
-                    />
+                      variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0 } }}
+                    >
+                      <ProductCard
+                        product={product}
+                        categories={categories}
+                        onClick={handleProductClick}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
-            </section>
+            </motion.section>
           </>
         )}
       </main>

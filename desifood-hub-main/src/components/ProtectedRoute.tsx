@@ -18,7 +18,15 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   useEffect(() => {
     // 🚨 Don’t run until user object is ready
-    if (!user?.id) return;
+    if (!user?.id) {
+      navigate('/')
+      toast({
+          title: "Error",
+          description: "Could not verify your access. Redirecting...",
+          variant: "destructive",
+        });
+      return
+    };
 
     const verifyUserRole = async () => {
       try {
