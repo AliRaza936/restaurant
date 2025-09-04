@@ -23,7 +23,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
-   const { items } = useAppSelector(state => state.cart);
+  const { items } = useAppSelector(state => state.cart);
   const { count: favoritesCount } = useAppSelector(state => state.favorites);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -164,6 +164,16 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
             <Button variant="ghost" size="icon" onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}>
               <SearchIcon className="h-5 w-5 text-white" />
             </Button>
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-2 w-2 text-white" />
+                {items?.length > 0 && (
+                  <span className="absolute -top-0 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {items?.length}
+                  </span>
+                )}
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon" className='text-white' onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -235,12 +245,12 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
                 </Link>
               </>
             )}
-            <Link to="/cart" className="block">
+            {/* <Link to="/cart" className="block">
               <Button variant="outline" className="w-full justify-start text-white">
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Cart ({items?.length})
               </Button>
-            </Link>
+            </Link> */}
           </div>
         )}
       </div>
