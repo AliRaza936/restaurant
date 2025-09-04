@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from '@/store/product/productSlice';
 import { getCat } from '@/store/category/categorySlice';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';   
+import { motion } from 'framer-motion';   // ✅ import
 import Loader from '@/components/Loader';
 
 const SkeletonCard = () => (
@@ -75,23 +75,28 @@ const Home = () => {
   if (error) {
     toast.error(error);
   }
-  const [showEntryLoader, setShowEntryLoader] = useState(true);
+   const [showEntryLoader, setShowEntryLoader] = useState(false);
 
   useEffect(() => {
-    // random delay between 2000–3000ms
-    const delay = Math.floor(Math.random() * 1000) + 2000;
+    const hasVisited = sessionStorage.getItem("hasVisited");
 
-    const timer = setTimeout(() => {
-      setShowEntryLoader(false);
-    }, delay);
+    if (!hasVisited) {
+      setShowEntryLoader(true);
 
-    return () => clearTimeout(timer);
+      // random delay 2–3 sec
+      const delay = Math.floor(Math.random() * 1000) + 2000;
+      const timer = setTimeout(() => {
+        setShowEntryLoader(false);
+        sessionStorage.setItem("hasVisited", "true"); // ✅ mark as visited
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   if (showEntryLoader) {
     return <Loader />;
   }
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
