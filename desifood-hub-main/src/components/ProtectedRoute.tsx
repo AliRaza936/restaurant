@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { user, isAuthenticated, loading } = useAuth(); // make sure your hook returns a "loading" state
+  const { user, isAuthenticated, loading } = useAuth(); // now includes localStorage loading
   const navigate = useNavigate();
   const { toast } = useToast();
   const [checkingRole, setCheckingRole] = useState(true);
@@ -75,4 +75,5 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   return <>{children}</>;
 };
+
 

@@ -5,22 +5,27 @@ import { requestOtp, verifyOtp, updateProfile, logout, setUser } from '@/store/a
 import { toast } from 'sonner'
 
 export const useAuth = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const { user, loading, isAuthenticated, error } = useSelector((state: RootState) => state.auth)
-  
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, loading: reduxLoading, isAuthenticated, error } = useSelector((state: RootState) => state.auth);
+  const [loading, setLoading] = useState(true); // add local loading
 
   // Check if user is logged in from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (savedUser && !user) {
-      try {
-        const parsedUser = JSON.parse(savedUser)
-        dispatch(setUser(parsedUser))
-      } catch (error) {
-        localStorage.removeItem('user')
+    const initAuth = async () => {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser && !user) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          dispatch(setUser(parsedUser));
+        } catch {
+          localStorage.removeItem('user');
+        }
       }
-    }
-  }, [dispatch, user])
+      setLoading(false); // done initializing
+    };
+
+    initAuth();
+  }, [dispatch, user]);
 
   const sendOTP = async (email: string) => {
     try {
@@ -66,9 +71,9 @@ export const useAuth = () => {
     }
   }
 
-  return {
+return {
     user,
-    loading,
+    loading: loading || reduxLoading, // combine both
     isAuthenticated,
     sendOTP,
     verifyOTP,
@@ -76,5 +81,5 @@ export const useAuth = () => {
     signIn,
     signOut,
     updateProfile: updateProfileInfo,
-  }
-}
+  };
+};
