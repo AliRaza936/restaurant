@@ -10,34 +10,33 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth(); // make sure your hook returns a "loading" state
   const navigate = useNavigate();
   const { toast } = useToast();
   const [checkingRole, setCheckingRole] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    // 🚨 Don’t run until user object is ready
+    if (loading) return; // wait until auth state is ready
+
     if (!user?.id) {
-      navigate('/')
       toast({
-          title: "Error",
-          description: "Could not verify your access. Redirecting...",
-          variant: "destructive",
-        });
-      return
-    };
+        title: "Error",
+        description: "Could not verify your access. Redirecting...",
+        variant: "destructive",
+      });
+      navigate('/');
+      return;
+    }
 
     const verifyUserRole = async () => {
       try {
-        // ✅ Fetch role from API
         const { data } = await axios.get(`${API_URL}/auth/user/${user.id}`, {
           withCredentials: true,
         });
 
         const userRole = data?.user?.role || 'user';
 
-        // ✅ Role validation
         if (requiredRole) {
           const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
           if (!allowedRoles.includes(userRole)) {
@@ -64,10 +63,9 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
     };
 
     verifyUserRole();
-  }, [user?.id, requiredRole, navigate, toast, API_URL]);
+  }, [user, loading, requiredRole, navigate, toast, API_URL]);
 
-  // 🚨 If user not loaded yet → wait
-  if (!user?.id || checkingRole) {
+  if (loading || checkingRole) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         Checking access...
@@ -77,3 +75,4 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   return <>{children}</>;
 };
+
