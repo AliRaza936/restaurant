@@ -3,14 +3,13 @@
   import jwt from 'jsonwebtoken';
 
   import ObjectId from 'bson-objectid'
-import  db  from '../database/db.js'
+
   dotenv.config();
 
 
 import bcrypt from 'bcryptjs';
 
-import jwt from 'jsonwebtoken';
-import ObjectId from 'bson-objectid';
+
 import db from '../database/db.js';
 
 export const registerUser = async (req, res) => {
