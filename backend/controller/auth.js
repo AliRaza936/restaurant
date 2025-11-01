@@ -1,15 +1,14 @@
 
   import dotenv from 'dotenv';
   import jwt from 'jsonwebtoken';
-  import nodemailer from 'nodemailer';
-  import { v4 as uuidv4 } from 'uuid';
+
   import ObjectId from 'bson-objectid'
 import  db  from '../database/db.js'
   dotenv.config();
 
 
 import bcrypt from 'bcryptjs';
-import bcrypt from 'bcryptjs';
+
 import jwt from 'jsonwebtoken';
 import ObjectId from 'bson-objectid';
 import db from '../database/db.js';
