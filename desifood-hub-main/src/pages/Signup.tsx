@@ -1,102 +1,111 @@
 import { useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
-import { Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Lock, User, CheckCircle } from 'lucide-react'
-import Footer from '@/components/Footer'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export default function Signup() {
-  
-  const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
-  const [showOTP, setShowOTP] = useState(false)
-  const [step, setStep] = useState<'details' | 'otp'>('details')
-  const { sendOTP, verifyOTP, signUp, loading } = useAuth()
+  const navigate = useNavigate()
   const { toast } = useToast()
 
-  const handleSendOTP = async () => {
-    
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-    if (!email) {
-      toast({
-        title: "Error",
-        description: `Please enter your email`,
-        variant: "destructive"
-      })
-      return
-    }
-
-    // First create the user
-    const signUpResult = await signUp(email)
-    if (signUpResult.success) {
-      // Then send OTP
-      const otpResult = await sendOTP(email)
-      if (otpResult.success) {
-        setStep('otp')
-        setShowOTP(true)
-        toast({
-          title: "Success",
-          description: `OTP sent to your email`
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: otpResult.message,
-          variant: "destructive"
-        })
-      }
-    } else {
-      toast({
-        title: "Error",
-        description: signUpResult.message,
-        variant: "destructive"
-      })
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
+  const validateForm = () => {
+    const { name, email, password, confirmPassword } = formData
+
+    if (!name || !email || !password || !confirmPassword) {
       toast({
         title: "Error",
-        description: "Please enter a valid 6-digit OTP",
+        description: "All fields are required.",
         variant: "destructive"
       })
-      return
+      return false
     }
 
-    const result = await verifyOTP(email, otp)
-    if (result.success) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive"
+      })
+      return false
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      })
+      return false
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match.",
+        variant: "destructive"
+      })
+      return false
+    }
+
+    return true
+  }
+
+  const handleSignup = async () => {
+    if (!validateForm()) return
+
+    try {
+      setLoading(true)
+
+      const response = await axios.post(
+        `${API_URL}/auth/register`,
+        {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+
       toast({
         title: "Success",
-        description: "Account created successfully! ",
-        duration: 5000
+        description: response.data.message || "Account created successfully!",
       })
-      // Redirect to login page
-      setTimeout(() => {
-        window.location.href = '/'
-      }, 2000)
-    } else {
+
+      setTimeout(() => navigate('/login'), 2000)
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || "Signup failed. Please try again!"
       toast({
         title: "Error",
-        description: result.message,
+        description: errorMessage,
         variant: "destructive"
       })
+    } finally {
+      setLoading(false)
     }
-  }
-
-  const handleResendOTP = () => {
-    setOtp('')
-    handleSendOTP()
-  }
-
-  const handleBackToDetails = () => {
-    setStep('details')
-    setShowOTP(false)
-    setOtp('')
   }
 
   return (
@@ -109,99 +118,107 @@ export default function Signup() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
         </Link>
-        
+
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-white">Create Account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-orange-700">Create Account</CardTitle>
             <CardDescription className="text-gray-600">
-              Sign up with OTP verification via email
+              Sign up with your email and password
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
-            {step === 'details' ? (
-              <>
-                <div className="space-y-4">
-                  
-
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                  <User className="w-5 h-5 text-gray-400" />
                 </div>
-
-                <Button
-                  onClick={handleSendOTP}
-                  disabled={loading || !email}
-                  className="w-full mt-6 bg-orange-600 hover:bg-orange-700"
-                >
-                  {loading ? 'Creating Account...' : 'Create Account & Send OTP'}
-                </Button>
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="text-center mb-6">
-                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-2" />
-                  <h3 className="text-lg font-semibold text-gray-900">Account Created!</h3>
-                  <p className="text-sm text-gray-600">
-                    Please verify your email with the OTP sent to:
-                  </p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{email}</p>
-                </div>
-
-                <div>
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      id="otp"
-                      type="text"
-                      placeholder="000000"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      maxLength={6}
-                      className="text-center text-lg font-mono"
-                    />
-                    <Lock className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    OTP sent to your email
-                  </p>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleVerifyOTP} 
-                    disabled={loading || otp.length !== 6}
-                    className="flex-1 bg-orange-600 hover:bg-orange-700"
-                  >
-                    {loading ? 'Verifying...' : 'Verify OTP'}
-                  </Button>
-                  <Button 
-                    onClick={handleResendOTP} 
-                    disabled={loading}
-                    variant="outline"
-                    className="px-4"
-                  >
-                    Resend
-                  </Button>
-                </div>
-
-                <Button 
-                  onClick={handleBackToDetails} 
-                  variant="ghost"
-                  className="w-full"
-                >
-                  Back to Details
-                </Button>
               </div>
-            )}
+
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  <Mail className="w-5 h-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center gap-2 mt-1 relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password (min 6 chars)"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="pr-10"
+                  />
+                  {showPassword ? (
+                    <EyeOff
+                      onClick={() => setShowPassword(false)}
+                      className="w-5 h-5 text-gray-500 cursor-pointer absolute right-2"
+                    />
+                  ) : (
+                    <Eye
+                      onClick={() => setShowPassword(true)}
+                      className="w-5 h-5 text-gray-500 cursor-pointer absolute right-2"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="flex items-center gap-2 mt-1 relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="pr-10"
+                  />
+                  {showConfirmPassword ? (
+                    <EyeOff
+                      onClick={() => setShowConfirmPassword(false)}
+                      className="w-5 h-5 text-gray-500 cursor-pointer absolute right-2"
+                    />
+                  ) : (
+                    <Eye
+                      onClick={() => setShowConfirmPassword(true)}
+                      className="w-5 h-5 text-gray-500 cursor-pointer absolute right-2"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSignup}
+              disabled={loading}
+              className="w-full mt-6 bg-orange-600 hover:bg-orange-700"
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
+            </Button>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
@@ -213,8 +230,6 @@ export default function Signup() {
             </div>
           </CardContent>
         </Card>
-        
-      
       </div>
     </div>
   )

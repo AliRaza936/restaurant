@@ -1,202 +1,113 @@
-import { useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useToast } from '@/hooks/use-toast'
-import { Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Lock } from 'lucide-react'
-import Footer from '@/components/Footer'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import axios from 'axios';
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
-  const [showOTP, setShowOTP] = useState(false)
-  const { sendOTP, verifyOTP, signIn, loading } = useAuth()
-  const { toast } = useToast()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSendOTP = async () => {
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email",
-        variant: "destructive"
-      })
-      return
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast({ title: 'Error', description: 'Email and password are required', variant: 'destructive' });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ title: 'Error', description: 'Password must be at least 6 characters', variant: 'destructive' });
+      return;
     }
 
-    // First check if email exists
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/check-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+      setLoading(true);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      toast({ title: 'Success', description: 'Login successful!' });
+      window.location.href = '/'; // redirect to home/dashboard
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Login failed. Try again.',
+        variant: 'destructive'
       });
-      
-      const data = await response.json();
-      
-      if (!data.exists) {
-        toast({
-          title: "Error",
-          description: "Email not registered. Please sign up first.",
-          variant: "destructive"
-        })
-        return
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to check email. Please try again.",
-        variant: "destructive"
-      })
-      return
+    } finally {
+      setLoading(false);
     }
-
-    const result = await sendOTP(email)
-    if (result.success) {
-      setShowOTP(true)
-      toast({
-        title: "Success",
-        description: result.message
-      })
-    } else {
-      toast({
-        title: "Error",
-        description: result.message,
-        variant: "destructive"
-      })
-    }
-  }
-
-  const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid 6-digit OTP",
-        variant: "destructive"
-      })
-      return
-    }
-
-    const result = await verifyOTP(email, otp)
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Login successful!"
-      })
-      // Redirect to home page or dashboard
-      window.location.href = '/'
-    } else {
-      toast({
-        title: "Error",
-        description: result.message,
-        variant: "destructive"
-      })
-    }
-  }
-
-  const handleResendOTP = () => {
-    setOtp('')
-    handleSendOTP()
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link 
-          to="/" 
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+        <Link to="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
         </Link>
-        
+
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-white">Welcome Back</CardTitle>
-            <CardDescription className="text-gray-600">
-              Sign in to your account with OTP verification via email
-            </CardDescription>
+            <CardDescription className="text-gray-600">Sign in to your account</CardDescription>
           </CardHeader>
-          
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email Address</Label>
+
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 pr-10"
                 />
+                <span
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </span>
               </div>
             </div>
 
-            {!showOTP ? (
-              <Button
-                onClick={handleSendOTP}
-                disabled={loading || !email}
-                className="w-full mt-6 bg-orange-600 hover:bg-orange-700"
-              >
-                {loading ? 'Sending...' : 'Send OTP'}
-              </Button>
-            ) : (
-              <div className="space-y-4 mt-6">
-                <div>
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      id="otp"
-                      type="text"
-                      placeholder="000000"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      maxLength={6}
-                      className="text-center text-lg font-mono"
-                    />
-                    <Lock className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    OTP sent to your email
-                  </p>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleVerifyOTP}
-                    disabled={loading || otp.length !== 6}
-                    className="flex-1 bg-orange-600 hover:bg-orange-700"
-                  >
-                    {loading ? 'Verifying...' : 'Verify OTP'}
-                  </Button>
-                  <Button
-                    onClick={handleResendOTP}
-                    disabled={loading}
-                    variant="outline"
-                    className="px-4"
-                  >
-                    Resend
-                  </Button>
-                </div>
-              </div>
-            )}
+            <Button
+              onClick={handleLogin}
+              disabled={loading}
+              className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-orange-600 hover:text-orange-700 font-medium">
-                  Sign up
-                </Link>
-              </p>
+            <div className="mt-4 text-center text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-orange-600 hover:text-orange-700 font-medium">
+                Sign up
+              </Link>
             </div>
           </CardContent>
         </Card>
-        
-    
       </div>
     </div>
-  )
+  );
 }
