@@ -122,10 +122,7 @@ export const ProductCard = ({
               size="sm"
               variant="outline"
               className="border-border hover:border-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch(addToCart(product));
-              }}
+            
             >
               <ShoppingCart className="w-4 h-4" />
             </Button>
