@@ -20,10 +20,7 @@ export default function Login() {
       toast({ title: 'Error', description: 'Email and password are required', variant: 'destructive' });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: 'Error', description: 'Password must be at least 6 characters', variant: 'destructive' });
-      return;
-    }
+    
 
     try {
       setLoading(true);
